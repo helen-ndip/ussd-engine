@@ -11,11 +11,7 @@ use Illuminate\Support\Collection;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * A Driver to handle incoming requests from Africa's Talking
- * USSD gateway.
- */
-class AfricasTalkingDriver extends WebDriver
+class ATVoiceDriver extends WebDriver
 {
     /**
      * Build payload from incoming request.

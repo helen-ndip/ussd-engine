@@ -1,10 +1,10 @@
 <?php
 
 use App\Conversations\SurveyConversation;
-use App\Drivers\AfricasTalkingDriver;
+use App\Drivers\ATVoiceDriver;
 use BotMan\BotMan\Drivers\DriverManager;
 
-DriverManager::loadDriver(AfricasTalkingDriver::class);
+DriverManager::loadDriver(ATVoiceDriver::class);
 
 // Botman commands for testing
 $botman = resolve('botman');
