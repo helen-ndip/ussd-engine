@@ -30,7 +30,7 @@ class ATVoiceDriver extends WebDriver
 
         $payload = [
             'driver'  => 'web',
-            'message' => $data['recordingUrl'] ?? null,
+            'message' => $data['recordingUrl'] ?? "survey",
             'userId'  => $data['callerNumber'] ?? null
         ];
 

@@ -33,16 +33,17 @@ class SurveyQuestion extends SelectQuestion
 
     public static function filterEnabledSurveys(array $surveys): array
     {
-        $enabledSurveys = config('settings.enabled_surveys', []);
-
-        $enabledSurveysIds = array_map(fn ($survey) => $survey['id'], $enabledSurveys);
-
-        $filteredSurveys = array_filter($surveys, fn ($survey) => in_array($survey['id'], $enabledSurveysIds));
-
-        if (count($enabledSurveys) > 0 && count($filteredSurveys) === 0) {
-            Log::warning('Surveys could not be filtered as expected.', ['enabledSurveys' => $enabledSurveys, 'surveysToFilter' => $surveys]);
-        }
-
-        return $filteredSurveys;
+        return [];
+//        $enabledSurveys = config('settings.enabled_surveys', []);
+//
+//        $enabledSurveysIds = array_map(fn ($survey) => $survey['id'], $enabledSurveys);
+//
+//        $filteredSurveys = array_filter($surveys, fn ($survey) => in_array($survey['id'], $enabledSurveysIds));
+//
+//        if (count($enabledSurveys) > 0 && count($filteredSurveys) === 0) {
+//            Log::warning('Surveys could not be filtered as expected.', ['enabledSurveys' => $enabledSurveys, 'surveysToFilter' => $surveys]);
+//        }
+//
+//        return $filteredSurveys;
     }
 }

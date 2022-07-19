@@ -23,19 +23,12 @@ class AfricasTalkingDriver extends WebDriver
      */
     public function buildPayload(Request $request)
     {
-        error_log("******building payload*****");
-        $body = $request->getContent();
-
-        error_log( $body ); //todo remove line
-
-        $arrayIncomingRequestData = explode("&", $body);
-
-        $data = $this->getFieldsFromRequest($arrayIncomingRequestData);
+        $data = $request->request->all();
 
         $payload = [
-            'driver'  => 'web',
-            'message' => $data['recordingUrl'] ?? null,
-            'userId'  => $data['callerNumber'] ?? null
+            'driver' => 'web',
+            'message' => isset($data['text']) ? $this->splitMessage($data['text']) : null,
+            'userId' =>  isset($data['phoneNumber']) ? $data['phoneNumber'] : null,
         ];
 
         $this->payload = $payload;
@@ -119,9 +112,9 @@ class AfricasTalkingDriver extends WebDriver
      */
     public function matchesRequest(): bool
     {
-        $africasTalkingVoiceKeys = ['sessionId', 'callerNumber', 'callerCountryCode', 'isActive', 'direction'];
+        $africasTalkingKeys = ['sessionId', 'phoneNumber', 'networkCode', 'serviceCode', 'text'];
 
-        foreach ($africasTalkingVoiceKeys as $key) {
+        foreach ($africasTalkingKeys as $key) {
             if (is_null($this->event->get($key))) {
                 return false;
             }
@@ -141,17 +134,5 @@ class AfricasTalkingDriver extends WebDriver
         $parts = explode('*', $message);
 
         return end($parts);
-    }
-    function getFieldsFromRequest(array $arrayIncomingRequestData){
-        $i = 0;
-        $payload = [];
-        while($i < count($arrayIncomingRequestData))
-        {
-            $keyValueArr = explode("=", $arrayIncomingRequestData[$i]);
-            $payload[$keyValueArr[0] . ''] = $keyValueArr[1]?? null;
-            $i++;
-        }
-
-        return $payload;
     }
 }
