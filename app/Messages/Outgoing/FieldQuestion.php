@@ -24,6 +24,8 @@ abstract class FieldQuestion extends Question implements FieldQuestionInterface
 
     protected $skipQuestion;
 
+    protected $acceptRecordedResponse;
+
 
     public function __construct(array $field)
     {
@@ -33,7 +35,7 @@ abstract class FieldQuestion extends Question implements FieldQuestionInterface
         parent::__construct($this->getTextContent());
     }
 
-    public function setDefaultAnswerValue(string $defaultAnswerValue) {
+        public function setDefaultAnswerValue(string $defaultAnswerValue) {
         $this->defaultAnswerValue = $defaultAnswerValue;
     }
 
@@ -114,6 +116,23 @@ abstract class FieldQuestion extends Question implements FieldQuestionInterface
     {
         $this->answerValue = $this->validate($answer);
     }
+
+    /**
+     * @return mixed
+     */
+    public function getAcceptRecordedResponse():bool
+    {
+        return $this->acceptRecordedResponse;
+    }
+
+    /**
+     * @param mixed $acceptRecordedResponse
+     */
+    public function setAcceptRecordedResponse(bool $acceptRecordedResponse): void
+    {
+        $this->acceptRecordedResponse = $acceptRecordedResponse;
+    }
+
 
     /**
      * Extract, validate and return the value from the provided Answer class.

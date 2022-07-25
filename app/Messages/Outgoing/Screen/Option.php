@@ -25,6 +25,14 @@ class Option
         return "{$this->getValueAsString()} {$this->text}";
     }
 
+    public function toVoicePrompt(): string {
+        $replace = [
+            'key' => $this->value,
+            'option' => $this->text,
+        ];
+        return __('conversation.voiceCommand', $replace);
+    }
+
     public function getValueAsString(): string
     {
         return "[{$this->value}]";

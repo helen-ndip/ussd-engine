@@ -99,7 +99,7 @@ class SurveyConversation extends Conversation
 
     public function setUserId(string $userId)
     {
-        $this->userId = $userId; 
+        $this->userId = $userId;
     }
 
     /**

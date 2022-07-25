@@ -2,6 +2,7 @@
 
 namespace App\Drivers;
 
+use App\Messages\Outgoing\FieldQuestion;
 use App\Messages\Outgoing\LastScreen;
 use BotMan\BotMan\Messages\Incoming\IncomingMessage;
 use BotMan\BotMan\Messages\Outgoing\OutgoingMessage;
@@ -20,17 +21,14 @@ class ATVoiceDriver extends WebDriver
     public function buildPayload(Request $request)
     {
         error_log("******building payload*****");
-        $body = $request->getContent();
+        $data = $request->request->all();
 
-        error_log( $body ); //todo remove line
-
-        $arrayIncomingRequestData = explode("&", $body);
-
-        $data = $this->getFieldsFromRequest($arrayIncomingRequestData);
+        error_log(json_encode($data) ); //todo remove line
+        error_log($data["callerNumber"] ?? "" . "  CALLER NUMBER ##"); //todo remove line
 
         $payload = [
             'driver'  => 'web',
-            'message' => $data['recordingUrl'] ?? "survey",
+            'message' => $data['dtmfDigits'] ?? null,
             'userId'  => $data['callerNumber'] ?? null
         ];
 
@@ -73,10 +71,15 @@ class ATVoiceDriver extends WebDriver
 
         $sessionIsCompleted = false;
         $replies = [];
+        $acceptRecordedResponse = false;
 
         foreach ($messages as $message) {
             if ($message instanceof OutgoingMessage || $message instanceof Question) {
                 $replies[] = $message->getText();
+
+                if ($message instanceof FieldQuestion ) {
+                    $acceptRecordedResponse = $message->getAcceptRecordedResponse();
+                }
             }
 
             if ($message instanceof LastScreen && ! $message->getCurrentPage()->hasNext()) {
@@ -84,11 +87,9 @@ class ATVoiceDriver extends WebDriver
             }
         }
 
-        $reply = $sessionIsCompleted ? 'END ' : 'CON ';
+        $reply = implode("\n", $replies);
 
-        $reply .= implode("\n", $replies);
-
-        return $reply;
+        return $this->buildVoiceResponse($acceptRecordedResponse, $reply, $sessionIsCompleted);
     }
 
     /**
@@ -127,6 +128,44 @@ class ATVoiceDriver extends WebDriver
     }
 
     /**
+     * @param $acceptRecordedResponse
+     * @param string $reply
+     * @return string
+     */
+    public function buildVoiceResponse($acceptRecordedResponse, string $reply, bool $end): string
+    {
+        if ($end){
+            $response = '<?xml version="1.0" encoding="UTF-8"?>';
+            $response .= '<Response>';
+            $response .= '<Say finishOnKey="#" maxLength="3" trimSilence="true" playBeep="true">' . $reply . '</Say>';
+            $response .= '<Record/>';
+            $response .= '</Response>';
+
+            return $response;
+        }
+
+        else if ($acceptRecordedResponse) {
+            $response = '<?xml version="1.0" encoding="UTF-8"?>';
+            $response .= '<Response>';
+            $response .= '<Record finishOnKey="#" maxLength="10" trimSilence="true" playBeep="true" >';
+            $response .= '<Say finishOnKey="#" maxLength="3" trimSilence="true" playBeep="true">' . $reply . '</Say>';
+            $response .= $response .= '</Record>';
+            $response .= '</Response>';
+
+            return $response;
+        }
+
+        $response = '<?xml version="1.0" encoding="UTF-8"?>';
+        $response .= '<Response>';
+        $response .= '<GetDigits finishOnKey="#">';
+        $response .= '<Say finishOnKey="#" maxLength="3" trimSilence="true" playBeep="true">' . $reply . '</Say>';
+        $response .= '</GetDigits>';
+        $response .= '</Response>';
+
+        return $response;
+    }
+
+    /**
      * Split message sent by AF and returns just the last one.
      *
      * @param string $message
@@ -137,17 +176,5 @@ class ATVoiceDriver extends WebDriver
         $parts = explode('*', $message);
 
         return end($parts);
-    }
-    function getFieldsFromRequest(array $arrayIncomingRequestData){
-        $i = 0;
-        $payload = [];
-        while($i < count($arrayIncomingRequestData))
-        {
-            $keyValueArr = explode("=", $arrayIncomingRequestData[$i]);
-            $payload[$keyValueArr[0] . ''] = $keyValueArr[1]?? null;
-            $i++;
-        }
-
-        return $payload;
     }
 }

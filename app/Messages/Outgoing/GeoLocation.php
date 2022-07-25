@@ -14,6 +14,7 @@ use Ushahidi\Platform\Client;
 class GeoLocation extends TextQuestion
 {
     protected $geoLocationResults = [];
+    private $processGeolocation = false;
 
     public function getAttributeName(): string
     {
@@ -48,7 +49,8 @@ class GeoLocation extends TextQuestion
     public function setAnswer(Answer $answer)
     {
         $this->answerValue = $this->validate($answer);
-        if ($this->answerValue) {
+
+        if ($this->processGeolocation && $this->answerValue) {
             $geoLocationResults = $this->queryLocation($this->answerValue);
             if (empty($geoLocationResults)) {
                 throw ValidationException::withMessages([$this->getAttributeName() => __('conversation.geolocation.noResults')]);

@@ -31,7 +31,7 @@ class QuestionScreen extends AbstractScreen
         $textPieces = [$this->getQuestionText()];
 
         foreach ($this->question->getButtons() as $button) {
-            $textPieces[] = "[{$button['value']}] {$button['text']}";
+            $textPieces[] = $this->getButtonVoiceCommand($button);
         }
 
         return new Page($textPieces, $this->getDefaultScreenOptions());
@@ -122,5 +122,14 @@ class QuestionScreen extends AbstractScreen
         }
 
         return $text;
+    }
+
+    private function getButtonVoiceCommand(array  $button) {
+       $replace = [
+            'key' => $button['value'],
+            'option' => $button['text'],
+        ];
+
+       return __('conversation.voiceCommand', $replace);
     }
 }

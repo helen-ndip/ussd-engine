@@ -44,7 +44,7 @@ class FieldQuestionFactory
             $setting = config('settings.when_default_values.description');
         } else {
             /* TODO: handling of default values for other fields disabled.
-             *       Before enabling, it's necessary to check that this 
+             *       Before enabling, it's necessary to check that this
              *       works well with data types other than text.
              */
             // $setting = config('settings.when_default_values.other');
@@ -63,6 +63,11 @@ class FieldQuestionFactory
 
     public static function create(array $field): FieldQuestion
     {
+        $input = $field['input'];
+        $type = $field['type'];
+        $isLocation = $input == 'location' && $type == 'point';
+        $defaultAnswer = $field['default']??'';
+
         $defaultsSetting = self::getFieldDefault($field);
 
         $field = self::createField($field);
@@ -75,8 +80,18 @@ class FieldQuestionFactory
             }
         }
 
+        if ($isLocation){
+            $field->setDefaultAnswerValue($defaultAnswer);
+            $field->setSkipQuestion(true);
+        }
+
+        $audioCommandType = ['text', 'textarea', 'date', 'datetime', 'select'];
+
+        if (in_array($input , $audioCommandType)){
+            $field->setAcceptRecordedResponse(true);
+        }
         return $field;
-    }   
+    }
 
     protected static function createField(array $field): FieldQuestion
     {

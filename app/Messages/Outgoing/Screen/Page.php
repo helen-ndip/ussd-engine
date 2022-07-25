@@ -121,7 +121,7 @@ class Page
      */
     public function appendScreenOption(Option $option): void
     {
-        $text = $option->toString();
+        $text = $option->toVoicePrompt();
         $textLength = Str::length($text);
         $this->checkScreenOptionsLength($textLength);
         $this->reserveCharacters($textLength);
