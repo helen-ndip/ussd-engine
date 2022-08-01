@@ -122,11 +122,11 @@ abstract class FieldQuestion extends Question implements FieldQuestionInterface
      */
     public function getAcceptRecordedResponse():bool
     {
-        return $this->acceptRecordedResponse;
+        return $this->acceptRecordedResponse == null ? false : $this->acceptRecordedResponse;
     }
 
     /**
-     * @param mixed $acceptRecordedResponse
+     * @param bool $acceptRecordedResponse
      */
     public function setAcceptRecordedResponse(bool $acceptRecordedResponse): void
     {

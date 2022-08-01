@@ -9,6 +9,7 @@ use BotMan\BotMan\Messages\Outgoing\OutgoingMessage;
 use BotMan\BotMan\Messages\Outgoing\Question;
 use BotMan\Drivers\Web\WebDriver;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -20,15 +21,15 @@ class ATVoiceDriver extends WebDriver
      */
     public function buildPayload(Request $request)
     {
-        error_log("******building payload*****");
+        Log::info("******building payload*****");
         $data = $request->request->all();
 
-        error_log(json_encode($data) ); //todo remove line
-        error_log($data["callerNumber"] ?? "" . "  CALLER NUMBER ##"); //todo remove line
+        Log::info(json_encode($data) );
+        Log::info($data["callerNumber"] ?? "" . "  CALLER NUMBER ##");
 
         $payload = [
             'driver'  => 'web',
-            'message' => $data['dtmfDigits'] ?? null,
+            'message' => $data['dtmfDigits'] ?? $data['recordingUrl'] ?? null,
             'userId'  => $data['callerNumber'] ?? null
         ];
 
@@ -77,8 +78,9 @@ class ATVoiceDriver extends WebDriver
             if ($message instanceof OutgoingMessage || $message instanceof Question) {
                 $replies[] = $message->getText();
 
-                if ($message instanceof FieldQuestion ) {
-                    $acceptRecordedResponse = $message->getAcceptRecordedResponse();
+                if (method_exists($message,'getQuestion') ) {
+                    $fieldQuestion = $message->getQuestion();
+                    $acceptRecordedResponse = $fieldQuestion->getAcceptRecordedResponse() ?? false;
                 }
             }
 
@@ -137,7 +139,7 @@ class ATVoiceDriver extends WebDriver
         if ($end){
             $response = '<?xml version="1.0" encoding="UTF-8"?>';
             $response .= '<Response>';
-            $response .= '<Say finishOnKey="#" maxLength="3" trimSilence="true" playBeep="true">' . $reply . '</Say>';
+            $response .= '<Say>' . $reply . '</Say>';
             $response .= '<Record/>';
             $response .= '</Response>';
 
@@ -147,9 +149,9 @@ class ATVoiceDriver extends WebDriver
         else if ($acceptRecordedResponse) {
             $response = '<?xml version="1.0" encoding="UTF-8"?>';
             $response .= '<Response>';
-            $response .= '<Record finishOnKey="#" maxLength="10" trimSilence="true" playBeep="true" >';
-            $response .= '<Say finishOnKey="#" maxLength="3" trimSilence="true" playBeep="true">' . $reply . '</Say>';
-            $response .= $response .= '</Record>';
+            $response .= '<Record finishOnKey="*" maxLength="10" trimSilence="true" playBeep="true" >';
+            $response .= '<Say playBeep="true">' . $reply . '</Say>';
+            $response .= '</Record>';
             $response .= '</Response>';
 
             return $response;
@@ -157,8 +159,8 @@ class ATVoiceDriver extends WebDriver
 
         $response = '<?xml version="1.0" encoding="UTF-8"?>';
         $response .= '<Response>';
-        $response .= '<GetDigits finishOnKey="#">';
-        $response .= '<Say finishOnKey="#" maxLength="3" trimSilence="true" playBeep="true">' . $reply . '</Say>';
+        $response .= '<GetDigits finishOnKey="*">';
+        $response .= '<Say playBeep="true">' . $reply . '</Say>';
         $response .= '</GetDigits>';
         $response .= '</Response>';
 
