@@ -91,7 +91,12 @@ class ATVoiceDriver extends WebDriver
 
         $reply = implode("\n", $replies);
 
-        return $this->buildVoiceResponse($acceptRecordedResponse, $reply, $sessionIsCompleted);
+        $response =  $this->buildVoiceResponse($acceptRecordedResponse, $reply, $sessionIsCompleted);
+
+        $response = str_replace ( "\n" , "  " , $response );
+
+        Log::info($response);
+        return $response;
     }
 
     /**
@@ -149,7 +154,7 @@ class ATVoiceDriver extends WebDriver
         else if ($acceptRecordedResponse) {
             $response = '<?xml version="1.0" encoding="UTF-8"?>';
             $response .= '<Response>';
-            $response .= '<Record finishOnKey="*" maxLength="10" trimSilence="true" playBeep="true" >';
+            $response .= '<Record finishOnKey="*" maxLength="60" trimSilence="true" playBeep="true" >';
             $response .= '<Say playBeep="true">' . $reply . '</Say>';
             $response .= '</Record>';
             $response .= '</Response>';

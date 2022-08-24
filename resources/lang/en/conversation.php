@@ -29,27 +29,27 @@ return [
   ],
   'screen' => [
     'next' => [
-      'value' => 'N',
+      'value' => '00',
       'text' => 'Next',
     ],
     'previous' => [
-      'value' => 'P',
+      'value' => '01',
       'text' => 'Previous',
     ],
     'skip' => [
-      'value' => 'S',
+      'value' => '10',
       'text' => 'Skip',
     ],
     'info' => [
-      'value' => '?',
+      'value' => '11',
       'text' => 'Show more information',
     ],
     'ok' => [
-      'value' => 'O',
+      'value' => '##',
       'text' => 'Ok',
     ],
     'cancel' => [
-      'value' => 'C',
+      'value' => '#',
       'text' => 'Cancel',
     ],
   ],
