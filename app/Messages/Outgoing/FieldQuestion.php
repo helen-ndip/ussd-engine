@@ -8,6 +8,7 @@ use Exception;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 
 abstract class FieldQuestion extends Question implements FieldQuestionInterface
 {
@@ -25,6 +26,10 @@ abstract class FieldQuestion extends Question implements FieldQuestionInterface
     protected $skipQuestion;
 
     protected $acceptRecordedResponse;
+    protected $driverFormat;
+
+    protected $driverProtocol;
+
 
 
     public function __construct(array $field)
@@ -35,7 +40,14 @@ abstract class FieldQuestion extends Question implements FieldQuestionInterface
         parent::__construct($this->getTextContent());
     }
 
-        public function setDefaultAnswerValue(string $defaultAnswerValue) {
+
+    public function setDriverInfo(string $driverFormat, string $driverProtocol)
+    {
+        $this->driverFormat = $driverFormat;
+        $this->driverProtocol = $driverProtocol;
+    }
+
+    public function setDefaultAnswerValue(string $defaultAnswerValue) {
         $this->defaultAnswerValue = $defaultAnswerValue;
     }
 
@@ -253,6 +265,23 @@ abstract class FieldQuestion extends Question implements FieldQuestionInterface
         return $this->answerValue;
     }
 
+    public function isFieldTypeEnabled()
+    {
+        if (!$this->driverFormat) {
+            return true;
+        }
+
+        $attr_name = $this->getAttributeName();
+        $settingName = "settings.{$this->driverFormat}.is_disabled_field_type.$attr_name";
+        $setting = config($settingName);
+
+        if ($setting == true) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
     /**
      * Used to know if the hints for this question should be shown by default.
      *
@@ -260,7 +289,9 @@ abstract class FieldQuestion extends Question implements FieldQuestionInterface
      */
     public function shouldShowHintsByDefault(): bool
     {
-        return false;
+        /* Provide as configured in the settings */
+        $attr_name = $this->getAttributeName();
+        return config("settings.ussd.show_hints_for_field_type.$attr_name") ?? false;
     }
 
     /**
